@@ -1,7 +1,7 @@
 # pokemon_it
 Pokemon Listing for test purpose.
 
-This is a Pokemon Listing page, for test perpuses. The list of pokemons has been acquired with the Pokemon V2 API (https://pokeapi.co/docs/v2)
+This is a Pokemon Listing page, for test purposes. The list of pokemons has been acquired with the Pokemon V2 API (https://pokeapi.co/docs/v2)
 and is updated (if there are new pokemons) with every visit, directly from the API.
 
 It is required that you build an SQL database (MySQL, MariaDB etc.) with the dump file included in this repo.
