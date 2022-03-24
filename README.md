@@ -23,3 +23,5 @@ Other features are a dynamic search for Pokemon names (both select from list or 
 (e.g. list by Speed and descenting order) and also a selector for listing specific Types of Pokemons.
 In the "Sort By" you can add other options or sort order, adding your options in the file "apokedata.php" both in $sql_sort_filter and $slc_sort_filter arrays.
 The types of Pokemons are gathered from the database (list of Pokemons grabbed from the Pokemon API), so if there are any new Types, they will be on auto update.
+
+The page is responsive as the units mostly used in html/css have been set to viewport sizes.
