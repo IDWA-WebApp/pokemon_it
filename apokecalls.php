@@ -196,10 +196,13 @@ function testForNewPokemons() {
  //keeps a referense in a session for message
  if ($PokeCountOK > 0) {
   $_SESSION['pokeupdatemessage'] = 'Pokemon Database has been updated! ' . $PokeCountOK . ' new Pokemons have been added.';
-  echo("1");
+  //message to refresh page to continue the update
+  if ($LastTableEntry < $totPoke) {
+   unset($_SESSION['pokeupdate']);
+   $_SESSION['pokeupdatemessage'] .= ' There are ' . ($totPoke - $LastTableEntry) . ' more Pokemons to be added. Please Refresh the page to update.';
+  }
  } else {
   $_SESSION['pokeupdatemessage'] = 'Pokemon Database is up to date! ' . $LastTableEntry . ' Pokemons in Database, ' . $totPoke . ' Pokemons in API Server.';
-  echo("2");
  }
  
 }
