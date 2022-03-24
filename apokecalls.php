@@ -213,4 +213,17 @@ function ShowMessages() {
  unset($_SESSION['pokeupdatemessage']);
 }
 
+
+//search for the favorites
+function getPokeFav(&$PokeFav) {
+ global $conn_poke;
+ $sqlA = 'SELECT pokemon_id FROM tbl_Pokemon_fav WHERE pokemon_user = \'demo\'';
+ $result = $conn_poke->query($sqlA);
+ if ($result->num_rows > 0) {
+  while($row = $result->fetch_assoc()) {
+   $PokeFav[$row['pokemon_id']] = 1;
+  }
+ }
+}
+
 ?>

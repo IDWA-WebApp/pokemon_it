@@ -29,6 +29,9 @@ $sqllimit = request_get('limit', 'intval', 'no', '20');
 function ListOfPokemonsFromDB() {
  global $sql_stat_fields, $sqloffset, $sqllimit;
  
+ //search in the favorites db for filters and marking the pokemons in the list
+ getPokeFav($PokeFav);
+ 
  //get data from the local db
  getThePokemons($PokeCount, $PokeStats, $PokeData);
  
@@ -68,6 +71,16 @@ function ListOfPokemonsFromDB() {
   
   //front image of the pokemon
   echo('  <div class="poke_img_cont" title="#' . $PokeData[$i]['id'] . '"><img src="' . $PokeData[$i]['img'] . '" class="poke_img"></div>' . PHP_EOL);
+  
+  //favorites button with AJAX call
+  echo('  <div style="position:relative; margin-left:-115%; margin-top:45%; z-index:10; width:10vw;">' . PHP_EOL);
+  $isactive = 'inactive'; $actiontext = 'Add to Favorites';
+  if ($PokeFav[$PokeData[$i]['id']]==1) { $isactive = 'active'; $actiontext = 'Remove from Favorites'; }
+  $myhashstring = strval($PokeData[$i]['id']) . session_id() . 'myaslt'; //as 'myaslt' you may use any custom word or random number in session for greater hash security
+  $myhash = hash('sha256', $myhashstring); //for checking and makeing the api submit only for the active sessions
+  echo('   <div id="fav-pokemon-' . $i . '" class="fav-pokemon fav-pokemon-' . $isactive . ' trs3 mpointer" title="' . $actiontext . '" onmouseover="fav_over(' . $i . ');" onmouseout="fav_out(' . $i . ');" onclick="FavoriteCall(' . $PokeData[$i]['id'] . ', ' . $i . ', \'' . $myhash . '\');"><div class="fav-heart"></div></div>' . PHP_EOL);
+  echo('   <div id="fav-pokemon-color-' . $i . '" class="half-circle half-circle-' . $isactive . ' trs3"></div>' . PHP_EOL);
+  echo('  </div>' . PHP_EOL);
   
   echo(' </div>' . PHP_EOL);
   
@@ -109,7 +122,7 @@ function paginationForPokemons($prevnext) {
   $jscript2 = ' onclick="document.getElementById(\'offset\').value=\'0\'; document.getElementById(\'form_search\').submit();"';
  }
  if ($prevnext=='prev-t') {
-  echo(' <div class="d-table-cell mg0a txtcenter nwrap" style="height:1.5vw; width:50%;">' . PHP_EOL);
+  echo(' <div class="d-table-cell mg0a txtcenter nwrap" style="height:1.5vw; width:10%;">' . PHP_EOL);
   echo('  <button title="First Page" class="d-inblock buttprevnext mgb1vw mpointer pdpagi2 ' . $isvisible . '" ' . $jscript2 . '>&#8249;&#8249;</button>&nbsp;' . PHP_EOL);
   echo('  <button title="Previous Page" class="d-inblock buttprevnext mgb1vw mpointer pdpagi1 ' . $isvisible . '" ' . $jscript1 . '>&nbsp;&#8249;&nbsp;</button>&nbsp;' . PHP_EOL);
   echo(' </div>' . PHP_EOL);
@@ -126,7 +139,7 @@ function paginationForPokemons($prevnext) {
   $jscript2 = ' onclick="document.getElementById(\'offset\').value=\'' . (($LastTableEntry - $sqllimit) + 1) . '\'; document.getElementById(\'form_search\').submit();"';
  }
  if ($prevnext=='next-t') {
-  echo(' <div class="btnnext d-table-cell mg0a txtcenter nwrap" style="height:1.5vw; width:50%;">' . PHP_EOL);
+  echo(' <div class="btnnext d-table-cell mg0a txtcenter nwrap" style="height:1.5vw; width:10%;">' . PHP_EOL);
   echo('  <button title="Next Page" class="d-inblock buttprevnext mgb1vw mpointer pdpagi1 ' . $isvisible . '"' . $jscript1 . '><span class="nextone">&nbsp;&#8250;&nbsp;</span></button>&nbsp;' . PHP_EOL);
   echo('  <button title="Last Page" class="d-inblock buttprevnext mgb1vw mpointer pdpagi2 ' . $isvisible . '"' . $jscript2 . '>&#8250;&#8250;</button>' . PHP_EOL);
   echo(' </div>' . PHP_EOL);
