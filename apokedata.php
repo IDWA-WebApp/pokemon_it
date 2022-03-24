@@ -53,11 +53,11 @@ $BlackList[32] = 'UPDATE ';
 $BlackList[33] = '`';
 $BlackList[34] = '\'';
 $BlackList[35] = '\\';
-$BlackList[36] = '’';
+$BlackList[36] = 'ï¿½';
 $BlackList[37] = ' OR ';
 $BlackList[38] = '<';
 $BlackList[39] = '>';
-$BlackList[40] = '“';
-$BlackList[41] = '”';
+$BlackList[40] = 'ï¿½';
+$BlackList[41] = 'ï¿½';
 
 ?>
