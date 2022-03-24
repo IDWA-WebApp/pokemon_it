@@ -53,11 +53,24 @@ $BlackList[32] = 'UPDATE ';
 $BlackList[33] = '`';
 $BlackList[34] = '\'';
 $BlackList[35] = '\\';
-$BlackList[36] = 'ï¿½';
+$BlackList[36] = '’';
 $BlackList[37] = ' OR ';
 $BlackList[38] = '<';
 $BlackList[39] = '>';
-$BlackList[40] = 'ï¿½';
-$BlackList[41] = 'ï¿½';
+$BlackList[40] = '“';
+$BlackList[41] = '”';
+
+$sql_sort_filter = array(' desc', ' asc', 'weight', 'height', 'id', 'name', 'speed', 'specialdefense', 'specialattack', 'defense', 'attack', 'hp', 'favorites');
+$slc_sort_filter = array('weight desc'         =>'&darr; Sort By Weight',
+                         'height desc'         =>'&darr; Sort By Height',
+                         'id asc'              =>'&uarr; Sort By Id',
+                         'name asc'            =>'&uarr; Sort By Name',
+                         'speed desc'          =>'&darr; Sort By Speed',
+                         'specialdefense desc' =>'&darr; Sort By Sp. Defense',
+                         'specialattack desc'  =>'&darr; Sort By Sp. Attack',
+                         'defense desc'        =>'&darr; Sort By Defense',
+                         'attack desc'         =>'&darr; Sort By Attack',
+                         'hp desc'             =>'&darr; Sort By Hp',
+                         'favorites desc'      =>'&darr; List my Favorites');
 
 ?>

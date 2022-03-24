@@ -1,8 +1,8 @@
 <?php
 
-if (!isset($_SESSION)) session_start(); //start a session
+if (!isset($_SESSION)) session_start(); //έναρξη session για έλεγχο ενημερώσεων στη βάση
 
-require('apokedata.php'); //db connection information
+require('apokedata.php'); //στοιχεία σύνδεσης με mariadb και δεδομένα/παράμετροι
 
 $poke_id = 0; if (isset($_POST['poke_id'])) $poke_id = intval($_POST['poke_id']);
 $action = ''; if (isset($_POST['action'])) $action = $_POST['action'];
@@ -10,10 +10,10 @@ $myhash = ''; if (isset($_POST['hash'])) $myhash = $_POST['hash'];
 
 if (($poke_id==0) or (!is_numeric($poke_id))) exit('incorrect id');
 if (!in_array($action, array('add','remove'), true )) exit('incorrect action');
-$myhashstring = strval($poke_id) . session_id() . 'myaslt'; //as 'myaslt' you may use any custom word or random number in session for greater hash security
+$myhashstring = strval($poke_id) . session_id() . 'myaslt'; //στο myaslt αν απαιτείται μεγαλύτερη ασφάλει βάλτε δικό σας salt ή κάποιον random αριθμό σε session
 if (($myhash=='') or ($myhash!=hash('sha256', $myhashstring))) exit('incorrect hash');
 
-//connect to the local db
+//έλεγχος και σύνδεση με την βάση
 $conn_poke = new mysqli($servername_poke, $username_poke, $password_poke, $dbname_poke);
 if ($conn_poke->connect_error) { die('DB Connection failed. Please try again in a while.1'); }
 $conn_poke->set_charset('utf8');

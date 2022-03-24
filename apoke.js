@@ -80,6 +80,8 @@ function FavoriteCall(poke_id, irow, myhash) {
      ShowMessage('We are sorry! The action was not completed. Please try again. (Message: ' + xmlhttp.response + ')');
      return false;
     } else {
+     //document.getElementById('sLoading_' + i).style.visibility = 'hidden';
+     //document.getElementById('sLoading_' + i).style.display = 'none';
      var irow = xmlhttp.extraInfo
      var newtitlevalue = '';
      var favbutton = document.getElementById('fav-pokemon-' + irow);

@@ -64,7 +64,7 @@ function ucfirstletters($string) {
 
 
 //main function to get the pokemon data with sorting and pagination per 20
-function getThePokemons(&$PokeCount, &$PokeStats, &$PokeData, $quick_name_search) {
+function getThePokemons(&$PokeCount, &$PokeStats, &$PokeData, $quick_name_search, $filter_sort, $sqlfilter_sort, $filter_type) {
  
  global $sqloffset, $sqllimit, $LastTableEntry, $sql_stat_fields, $conn_poke, $cur_results;
  
@@ -76,13 +76,20 @@ function getThePokemons(&$PokeCount, &$PokeStats, &$PokeData, $quick_name_search
  if (($sqloffset + $sqllimit) > $LastTableEntry) $sqloffset = $LastTableEntry - $sqllimit;
  if (($sqllimit<10) or ($sqllimit>50)) $sqllimit = 20;
  
+ $sqlfilter_type = '';
+ if ($filter_type!='') $sqlfilter_type = ' AND (types1 = \'' . $filter_type . '\' OR types2 = \'' . $filter_type . '\')';
+ 
  //create sql select command
- $sqlA = ''; $sqlfilter_sort = ' weight desc';
+ $sqlA = '';
  if ($quick_name_search!='') {
   $sqlA .= ' AND name LIKE \'%' . $quick_name_search . '%\'';
   $sqlfilter_sort = 'INSTR(name, \'' . $quick_name_search . '\')';
+  if ($filter_sort!='') $sqlfilter_sort = $sqlfilter_sort . ', ' . $filter_sort;
  }
- $sqlA .= ' ORDER BY ' . $sqlfilter_sort . ', name ';
+ if ($filter_sort=='favorites desc') {
+  $sqlfilter_type .= ' AND id IN (SELECT pokemon_id FROM tbl_Pokemon_fav WHERE pokemon_user = \'demo\')';
+ }
+ $sqlA .= $sqlfilter_type . ' ORDER BY ' . $sqlfilter_sort . ', name ';
  
  //count total results
  $sqlB = 'SELECT COUNT(id) AS totresults FROM tbl_Pokemon WHERE 1=1' . $sqlA . ';';
@@ -243,10 +250,12 @@ function sanitize_variable($value) {
 
 //returns an array list with pokemon names
 function getPokemonNames($categ) {
- global $conn_poke;
+ global $conn_poke, $filter_sort, $filter_type;
  $PokeNamesCount = 0;
  $PokeNames = array();
- $sqlA = 'SELECT name FROM tbl_Pokemon';
+ $sqlA = 'SELECT name FROM tbl_Pokemon WHERE 1=1';
+ if ($filter_type!='') $sqlA .= ' AND types1=\'' . $filter_type . '\' OR types2 = \'' . $filter_type . '\'';
+ if ($filter_sort=='favorites desc') $sqlA .= ' AND id IN (SELECT pokemon_id FROM tbl_Pokemon_fav WHERE pokemon_user = \'demo\')';
  $sqlA .= ' ORDER BY name;';
  $result = $conn_poke->query($sqlA);
  if ($result->num_rows > 0) {
@@ -257,5 +266,36 @@ function getPokemonNames($categ) {
  }
  return $PokeNames;
 } 
+
+
+//returns an array list with pokemon types
+function getPokemonTypes($categ) {
+ global $conn_poke;
+ $PokeTypesCount = 0;
+ $PokeTypes = array();
+ $sqlA = '(SELECT types2 FROM tbl_Pokemon GROUP BY types2 ORDER BY types2) UNION (SELECT types1 FROM tbl_Pokemon GROUP BY types1 ORDER BY types1);';
+ $result = $conn_poke->query($sqlA);
+ if ($result->num_rows > 0) {
+  while($row = $result->fetch_assoc()) {
+   if ($row['types2']!='') {
+    $PokeTypes[$PokeTypesCount] = $row['types2'];
+    $PokeTypesCount++;
+   }
+  }
+ }
+ return $PokeTypes;
+} 
+
+
+//check the filter for not valid values
+function check_string_filter($string) {
+ global $sql_sort_filter;
+ $test = $string;
+ foreach ($sql_sort_filter as $key=>$value) {
+  $test = str_replace($value, '', $test);
+ }
+ if ($test!='') $string = ' weight desc';
+ return $string;
+}
 
 ?>
