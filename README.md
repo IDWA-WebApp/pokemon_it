@@ -1,7 +1,6 @@
 Pokemon Listing for test purpose.
 
-This is a Pokemon Listing page, for test purposes. The list of pokemons has been acquired with the Pokemon V2 API (https://pokeapi.co/docs/v2)
-and is updated (if there are new pokemons) with every visit, directly from the API.
+This is a Pokemon Listing page, for test purposes. The list of pokemons has been acquired with the Pokemon V2 API (https://pokeapi.co/docs/v2) and is updated (if there are new pokemons) with every visit, directly from the API.
 
 It is required that you build an SQL database (MySQL, MariaDB etc.) with the dump file included in this repo. Also, you must declare the database connection information in the "apokedata.php". The database has already filled in the Pokemons till 03/2022 and also has records of favorites as a demo.
 
