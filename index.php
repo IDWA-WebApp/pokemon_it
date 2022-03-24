@@ -31,7 +31,12 @@ require('apokemain.php'); //load main
 
 <!-- form for search, previous, next -->
 <form action="<?= basename($_SERVER['PHP_SELF']) ?>" id="form_search" name="form_search" method="get" style="margin: 0px; display:none;">
+<input type="hidden" id="quick_name_search" name="quick_name_search" value="<?= $quick_name_search ?>">
 <input type="hidden" id="offset" name="offset" value="<?= $sqloffset ?>">
+</form>
+<!-- form for reset -->
+<form action="<?= basename($_SERVER['PHP_SELF']) ?>" id="form_reset" name="form_reset" method="get" style="margin: 0px; display:none;">
+<input type="hidden" id="reset_quick_name_search" name="quick_name_search" value="<?= $quick_name_search ?>">
 </form>
 
 <div class='trandiv' style='opacity:0;' id='trandiv'>
@@ -46,18 +51,20 @@ require('apokemain.php'); //load main
   
   <div class='insidecontainer'>
    
-   <!-- previous, next section -->
+   <!-- search, previous, next section -->
    <div class='h10vw'></div> <!-- make space for menu, as it loads after the main table list -->
    
    <!-- main table with pokemon list -->
    <?php ListOfPokemonsFromDB(); ?>
    
    
-   <!-- previous, next section -->
+   <!-- search, previous, next section -->
    <div class='top_table mg0a w100p'> <!-- move to top of the insidecontainer -->
     <div class='d-table mg0a txtcenter w100p' style='height:2vw;'>
     
      <?php paginationForPokemons('prev-t'); ?>
+     
+     <?php SelectOptionsForPokemons(); ?>
      
      <?php paginationForPokemons('next-t'); ?>
       

@@ -64,7 +64,7 @@ function ucfirstletters($string) {
 
 
 //main function to get the pokemon data with sorting and pagination per 20
-function getThePokemons(&$PokeCount, &$PokeStats, &$PokeData) {
+function getThePokemons(&$PokeCount, &$PokeStats, &$PokeData, $quick_name_search) {
  
  global $sqloffset, $sqllimit, $LastTableEntry, $sql_stat_fields, $conn_poke, $cur_results;
  
@@ -77,8 +77,12 @@ function getThePokemons(&$PokeCount, &$PokeStats, &$PokeData) {
  if (($sqllimit<10) or ($sqllimit>50)) $sqllimit = 20;
  
  //create sql select command
- $sqlA = '';
- $sqlA .= ' ORDER BY weight desc, name ';
+ $sqlA = ''; $sqlfilter_sort = ' weight desc';
+ if ($quick_name_search!='') {
+  $sqlA .= ' AND name LIKE \'%' . $quick_name_search . '%\'';
+  $sqlfilter_sort = 'INSTR(name, \'' . $quick_name_search . '\')';
+ }
+ $sqlA .= ' ORDER BY ' . $sqlfilter_sort . ', name ';
  
  //count total results
  $sqlB = 'SELECT COUNT(id) AS totresults FROM tbl_Pokemon WHERE 1=1' . $sqlA . ';';
@@ -225,5 +229,33 @@ function getPokeFav(&$PokeFav) {
   }
  }
 }
+
+
+//sanitize post/get data for dirrect use in an sql command
+function sanitize_variable($value) {
+ global $iBlackList, $BlackList;
+ for ($i = 1; $i <= $iBlackList; $i++) {
+  if (strpos($value, $BlackList[$i]) !== false) $i = str_replace($BlackList[$i], '', $value);
+ }
+ return $value;
+}
+
+
+//returns an array list with pokemon names
+function getPokemonNames($categ) {
+ global $conn_poke;
+ $PokeNamesCount = 0;
+ $PokeNames = array();
+ $sqlA = 'SELECT name FROM tbl_Pokemon';
+ $sqlA .= ' ORDER BY name;';
+ $result = $conn_poke->query($sqlA);
+ if ($result->num_rows > 0) {
+  while($row = $result->fetch_assoc()) {
+   $PokeNames[$PokeNamesCount] = $row['name'];
+   $PokeNamesCount++;
+  }
+ }
+ return $PokeNames;
+} 
 
 ?>

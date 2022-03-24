@@ -93,3 +93,72 @@ function FavoriteCall(poke_id, irow, myhash) {
   }
  };
 }
+
+
+//functions for the interactive search box/drop down
+//show list
+function xdropdownFunctionP(id) {
+ document.getElementById('xmyDropdownP' + id).classList.toggle('showP' + id);
+ if (document.getElementById('xdropdownstateP' + id).value=='') {
+  document.getElementById('xdropdownstateP' + id).value='1';
+  return true;
+ }
+ if (document.getElementById('xdropdownstateP' + id).value=='1') {
+  document.getElementById('xdropdownstateP' + id).value='';
+  return true;
+ }
+}
+//hide list on Esc key
+function xdropdownEscCheckP(evt) {
+ var charCode = (evt.which) ? evt.which : event.keyCode
+ if (charCode == 27) {
+  for (var i = 1; i <= 20; i++) {
+   if (document.getElementById('xdropdownstateP' + i)) {
+    if (document.getElementById('xdropdownstateP' + i).value=='1') {
+     document.getElementById('xmyInputP' + i).value='';
+     xfilterFunctionP(i);
+     document.getElementById('xmyDropdownP' + i).classList.toggle('showP' + i);
+     document.getElementById('xdropdownstateP' + i).value='';
+    }
+   } else {
+    break;
+   }
+  }
+ }
+}
+//search filter
+function xfilterFunctionP(id) {
+ var input, filter, ul, li, a, i, t;
+ input = document.getElementById('xmyInputP' + id);
+ filter = input.value.toUpperCase();
+ div = document.getElementById('xmyDropdownP' + id);
+ a = div.getElementsByTagName('a');
+ for (i = 0; i < a.length; i++) {
+  t = a[i].id;
+  if (t.substr(0, 10)!='hiddenhref') {
+   if (a[i].innerHTML.toUpperCase().indexOf(filter) > -1) {
+    a[i].style.display = '';
+   } else {
+    a[i].style.display = 'none';
+   }
+  }
+ }
+}
+//hide on click away of the search box
+window.onclick = function(ev) {
+ var go;
+ for (var i = 1; i <= 20; i++) {
+  if (document.getElementById('xdropdownstateP' + i)) {
+   go = 0;
+   if ((ev.target.name!='xdropdown1P' + i) && (ev.target.name!='xdropdown2P' + i)) go = 1;
+   if (go==1) {
+    if (document.getElementById('xdropdownstateP' + i).value=='1') {
+     document.getElementById('xmyInputP' + i).value='';
+     xfilterFunctionP(i);
+     document.getElementById('xmyDropdownP' + i).classList.toggle('showP' + i);
+     document.getElementById('xdropdownstateP' + i).value='';
+    }
+   }
+  }
+ }
+}

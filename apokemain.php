@@ -23,11 +23,13 @@ testForNewPokemons();
 //requests
 $sqloffset = request_get('offset', 'intval', 'no', '0');
 $sqllimit = request_get('limit', 'intval', 'no', '20');
+$quick_name_search = request_get('quick_name_search', 'string', '', '');
+$quick_name_search = sanitize_variable($quick_name_search);
 
 
 //main search and preview the list of pokemons
 function ListOfPokemonsFromDB() {
- global $sql_stat_fields, $sqloffset, $sqllimit;
+ global $sql_stat_fields, $quick_name_search, $sqloffset, $sqllimit;
  
  //search in the favorites db for filters and marking the pokemons in the list
  getPokeFav($PokeFav);
@@ -153,10 +155,53 @@ function paginationForPokemons($prevnext) {
 
 //show number of results and details/reset
 function paginationPageNumber() {
- global $LastTableEntry, $sqloffset, $sqllimit, $cur_results;
- if (($sqloffset + $sqllimit) > $LastTableEntry) $sqloffset = $LastTableEntry - $sqllimit;
- if (($sqllimit<0) or ($sqllimit>50)) $sqllimit = 20;
- echo(' <div class="pos-rel txtcenter mg0a" style="height:2vw; font-size:1vw; font-weight:600; color:#555;">' . ($LastTableEntry > 0 ? ('Showing ' . ($sqloffset + 1) . ' to ' . ($sqloffset + ($LastTableEntry > $sqllimit ? $sqllimit : $LastTableEntry)) . ' (from ' . $LastTableEntry . ')') : 'No Results') . '</div>' . PHP_EOL);
+ global $LastTableEntry, $sqloffset, $sqllimit, $quick_name_search, $cur_results;
+ if ($quick_name_search!='') {
+  echo(' <div class="pos-rel txtcenter mg0a" style="height:2vw; font-size:1vw; font-weight:600; color:#555;">Search results for "<i>' . $quick_name_search . '</i>" ' . ($cur_results > 0 ? (($sqloffset + 1) . ' to ' . ($sqloffset + ($cur_results > $sqllimit ? $sqllimit : $cur_results)) . ' (from ' . $cur_results . ')') : 'No Results') . ' (<span style="color:#006699;" class="mpointer" onclick="document.getElementById(\'reset_quick_name_search\').value=\'\'; document.getElementById(\'form_reset\').submit();">Click to Reset</span>)</div>' . PHP_EOL);
+ } else {
+  if (($sqloffset + $sqllimit) > $LastTableEntry) $sqloffset = $LastTableEntry - $sqllimit;
+  if (($sqllimit<0) or ($sqllimit>50)) $sqllimit = 20;
+  echo(' <div class="pos-rel txtcenter mg0a" style="height:2vw; font-size:1vw; font-weight:600; color:#555;">' . ($LastTableEntry > 0 ? ('Showing ' . ($sqloffset + 1) . ' to ' . ($sqloffset + ($LastTableEntry > $sqllimit ? $sqllimit : $LastTableEntry)) . ' (from ' . $LastTableEntry . ')') : 'No Results') . '</div>' . PHP_EOL);
+ }
+}
+
+
+//searches and filters
+function SelectOptionsForPokemons() {
+ 
+ //create array with the pokemon names
+ $PokeNames = getPokemonNames('');
+ 
+ //select/search pokemon name
+ echo(' <div class="d-table-cell mg0a txtcenter" style="height:1.5vw; width:28%;">' . PHP_EOL);
+ echo(' <input type="hidden" id="xdropdownstateP1" name="xdropdownstateP1" value="">' . PHP_EOL);
+ echo(' <div class="xdropdownP" style="width:18vw; border-radius:10px;">' . PHP_EOL);
+ echo('  <button type="button" name="xdropdown1P1" onclick="xdropdownFunctionP(\'1\')" onkeydown="xdropdownEscCheckP(event);" class="xdropbtnP dropbox dropdown nwrap" style="width:18vw; border-radius:10px;">Search Pok&eacute;mons &#8628;</button>' . PHP_EOL);
+ echo('  <div id="xmyDropdownP1" class="xdropdownP-content" style="width:18vw; height:36vw; overflow-y:scroll; overflow-x:hidden;">' . PHP_EOL);
+ echo('   <input type="text" name="xdropdown2P1" placeholder="Type and Press Enter to search..." id="xmyInputP1" onkeyup="xfilterFunctionP(\'1\')" onkeydown="xdropdownEscCheckP(event);">' . PHP_EOL);
+ for ($i = 0; $i < sizeof($PokeNames); $i++) {
+  echo('    <a href="#" onclick="pokesearch(\'' . $PokeNames[$i] . '\');">' . $PokeNames[$i] . '</a>' . PHP_EOL);
+ }
+ echo('  </div>' . PHP_EOL);
+ echo(' </div>' . PHP_EOL);
+ echo(' <script>' . PHP_EOL);
+ echo(' var input = document.getElementById("xmyInputP1");' . PHP_EOL);
+ echo(' input.addEventListener("keyup", function(event) {' . PHP_EOL);
+ echo('  if (event.keyCode === 13) {' . PHP_EOL);
+ echo('   event.preventDefault();' . PHP_EOL);
+ echo('   document.getElementById("quick_name_search").value = document.getElementById("xmyInputP1").value;' . PHP_EOL);
+ echo('   document.getElementById("offset").value = 0;' . PHP_EOL);
+ echo('   document.getElementById("form_search").submit();' . PHP_EOL);
+ echo('  }' . PHP_EOL);
+ echo(' });' . PHP_EOL);
+ echo(' function pokesearch(name) {' . PHP_EOL);
+ echo('  event.preventDefault();' . PHP_EOL);
+ echo('  document.getElementById("quick_name_search").value = name;' . PHP_EOL);
+ echo('  document.getElementById("offset").value = 0;' . PHP_EOL);
+ echo('  document.getElementById("form_search").submit();' . PHP_EOL);
+ echo(' }' . PHP_EOL);
+ echo(' </script>' . PHP_EOL);
+ echo(' </div>' . PHP_EOL);
 }
 
 ?>
