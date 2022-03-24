@@ -29,13 +29,24 @@ require('apokemain.php'); //load main
 
 <body marginwidth='0' marginheight='0' style='background-color:#fff; height:100%; overflow-y:scroll; margin-left:5px; margin-top:0px; margin-bottom:50px; margin:0; padding:0px; font-family:Verdana; font-size:13px;' bgcolor='#FFFFFF'>
 
+<!-- form for sort/type -->
+<form action="<?= basename($_SERVER['PHP_SELF']) ?>" id="form_sort" name="form_sort" method="get" style="margin: 0px; display:none;">
+<input type="hidden" id="filter_sort" name="filter_sort" value="<?= $filter_sort ?>">
+<input type="hidden" id="filter_type" name="filter_type" value="<?= $filter_type ?>">
+<input type="hidden" name="quick_name_search" value="<?= $quick_name_search ?>">
+<input type="hidden" name="offset" value="0">
+</form>
 <!-- form for search, previous, next -->
 <form action="<?= basename($_SERVER['PHP_SELF']) ?>" id="form_search" name="form_search" method="get" style="margin: 0px; display:none;">
+<input type="hidden" name="filter_sort" value="<?= $filter_sort ?>">
+<input type="hidden" name="filter_type" value="<?= $filter_type ?>">
 <input type="hidden" id="quick_name_search" name="quick_name_search" value="<?= $quick_name_search ?>">
 <input type="hidden" id="offset" name="offset" value="<?= $sqloffset ?>">
 </form>
 <!-- form for reset -->
 <form action="<?= basename($_SERVER['PHP_SELF']) ?>" id="form_reset" name="form_reset" method="get" style="margin: 0px; display:none;">
+<input type="hidden" id="reset_filter_sort" name="filter_sort" value="<?= $filter_sort ?>">
+<input type="hidden" id="reset_filter_type" name="filter_type" value="<?= $filter_type ?>">
 <input type="hidden" id="reset_quick_name_search" name="quick_name_search" value="<?= $quick_name_search ?>">
 </form>
 
@@ -51,14 +62,14 @@ require('apokemain.php'); //load main
   
   <div class='insidecontainer'>
    
-   <!-- search, previous, next section -->
+   <!-- sort, type, search, previous, next section -->
    <div class='h10vw'></div> <!-- make space for menu, as it loads after the main table list -->
    
    <!-- main table with pokemon list -->
    <?php ListOfPokemonsFromDB(); ?>
    
    
-   <!-- search, previous, next section -->
+   <!-- sort, type, search, previous, next section -->
    <div class='top_table mg0a w100p'> <!-- move to top of the insidecontainer -->
     <div class='d-table mg0a txtcenter w100p' style='height:2vw;'>
     

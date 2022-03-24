@@ -25,17 +25,24 @@ $sqloffset = request_get('offset', 'intval', 'no', '0');
 $sqllimit = request_get('limit', 'intval', 'no', '20');
 $quick_name_search = request_get('quick_name_search', 'string', '', '');
 $quick_name_search = sanitize_variable($quick_name_search);
+$filter_sort = request_get('filter_sort', 'string', 'no', ' weight desc');
+$filter_type = request_get('filter_type', 'string', '', '');
+$filter_type = sanitize_variable($filter_type);
 
 
 //main search and preview the list of pokemons
 function ListOfPokemonsFromDB() {
- global $sql_stat_fields, $quick_name_search, $sqloffset, $sqllimit;
+ global $sql_stat_fields, $sql_sort_filter, $filter_sort, $filter_type, $quick_name_search, $sqloffset, $sqllimit;
+ 
+ //check filters for accepted values
+ $sqlfilter_sort = check_string_filter($filter_sort);
  
  //search in the favorites db for filters and marking the pokemons in the list
  getPokeFav($PokeFav);
+ if ($filter_sort=='favorites desc') $sqlfilter_sort = 'name';
  
  //get data from the local db
- getThePokemons($PokeCount, $PokeStats, $PokeData);
+ getThePokemons($PokeCount, $PokeStats, $PokeData, $quick_name_search, $filter_sort, $sqlfilter_sort, $filter_type);
  
  //show pokemon list
  for ($i = 1; $i <= sizeof($PokeData); $i++) {
@@ -155,9 +162,11 @@ function paginationForPokemons($prevnext) {
 
 //show number of results and details/reset
 function paginationPageNumber() {
- global $LastTableEntry, $sqloffset, $sqllimit, $quick_name_search, $cur_results;
- if ($quick_name_search!='') {
-  echo(' <div class="pos-rel txtcenter mg0a" style="height:2vw; font-size:1vw; font-weight:600; color:#555;">Search results for "<i>' . $quick_name_search . '</i>" ' . ($cur_results > 0 ? (($sqloffset + 1) . ' to ' . ($sqloffset + ($cur_results > $sqllimit ? $sqllimit : $cur_results)) . ' (from ' . $cur_results . ')') : 'No Results') . ' (<span style="color:#006699;" class="mpointer" onclick="document.getElementById(\'reset_quick_name_search\').value=\'\'; document.getElementById(\'form_reset\').submit();">Click to Reset</span>)</div>' . PHP_EOL);
+ global $LastTableEntry, $sqloffset, $sqllimit, $filter_sort, $filter_type, $quick_name_search, $cur_results;
+ if (($quick_name_search!='') or ($filter_sort=='favorites desc') or ($filter_type!='')) {
+  if ($quick_name_search!='') echo(' <div class="pos-rel txtcenter mg0a" style="height:2vw; font-size:1vw; font-weight:600; color:#555;">Search results for "<i>' . $quick_name_search . '</i>" ' . ($cur_results > 0 ? (($sqloffset + 1) . ' to ' . ($sqloffset + ($cur_results > $sqllimit ? $sqllimit : $cur_results)) . ' (from ' . $cur_results . ')') : 'No Results') . ' (<span style="color:#006699;" class="mpointer" onclick="document.getElementById(\'reset_quick_name_search\').value=\'\'; document.getElementById(\'form_reset\').submit();">Click to Reset</span>)</div>' . PHP_EOL);
+  if ($filter_sort=='favorites desc') echo(' <div class="pos-rel txtcenter mg0a" style="height:2vw; font-size:1vw; font-weight:600; color:#555;">Showing your Favorites (<span style="color:#006699;" class="mpointer" onclick="document.getElementById(\'reset_filter_sort\').value=\'\'; document.getElementById(\'form_reset\').submit();">Click to Reset</span>)</div>' . PHP_EOL);
+  if ($filter_type!='') echo(' <div class="pos-rel txtcenter mg0a" style="height:2vw; font-size:1vw; font-weight:600; color:#555;">Showing <span class="poke_type_' . $filter_type . '">' . ucfirstletters($filter_type) . '</span> ' . ($cur_results > 0 ? (($sqloffset + 1) . ' to ' . ($sqloffset + ($cur_results > $sqllimit ? $sqllimit : $cur_results)) . ' (from ' . $cur_results . ')') : 'No Results') . ' (<span style="color:#006699;" class="mpointer" onclick="document.getElementById(\'reset_filter_type\').value=\'\'; document.getElementById(\'form_reset\').submit();">Click to Reset</span>)</div>' . PHP_EOL);
  } else {
   if (($sqloffset + $sqllimit) > $LastTableEntry) $sqloffset = $LastTableEntry - $sqllimit;
   if (($sqllimit<0) or ($sqllimit>50)) $sqllimit = 20;
@@ -168,6 +177,54 @@ function paginationPageNumber() {
 
 //searches and filters
 function SelectOptionsForPokemons() {
+ global $slc_sort_filter, $filter_sort, $filter_type;
+ 
+ //select for sorting
+ $opt_selected = array();
+ $opt_selected[$filter_sort] = ' selected';
+ echo(' <div class="d-table-cell mg0a txtcenter" style="height:1.5vw; width:28%;">' . PHP_EOL);
+ echo(' <select name="filter_sort" class="dropdown dropbox mpointer" style="width:18vw;" onchange="document.getElementById(\'filter_sort\').value=this.value; document.getElementById(\'form_sort\').submit();">' . PHP_EOL);
+ foreach ($slc_sort_filter as $slc=>$val) {
+  echo('  <option value="' . $slc . '" ' . $opt_selected[$slc] . '>' . $val . '</option>' . PHP_EOL);
+ }
+ echo(' </select>' . PHP_EOL);
+ echo(' </div>' . PHP_EOL);
+ echo(' &nbsp;' . PHP_EOL);
+ 
+ //create array with the pokemon types
+ $PokeTypes = getPokemonTypes('');
+ if (!in_array($filter_type, $PokeTypes)) $filter_type = '';
+ 
+ //select for pokemon types
+ /* simple select with no fx/colors
+ //$opt_selected = array();
+ //$opt_selected[$filter_type . '-'] = ' selected';
+ //echo(' <div class="d-table-cell mg0a txtcenter" style="height:1.5vw; width:24%;">' . PHP_EOL);
+ //echo(' <select name="filter_type" class="dropdown dropbox mpointer" style="width:16vw;" onchange="document.getElementById(\'filter_type\').value=this.value; document.getElementById(\'form_sort\').submit();">' . PHP_EOL);
+ //echo('  <option value="" ' . $opt_selected['-'] . '>List by Type</option>' . PHP_EOL);
+ //for ($i = 0; $i < sizeof($PokeTypes); $i++) {
+ // echo('  <option class="fntBold" value="' . $PokeTypes[$i] . '" ' . $opt_selected[$PokeTypes[$i] . '-'] . '>' . ucfirstletters($PokeTypes[$i]) . '</option>' . PHP_EOL);
+ //}
+ //echo(' </select>' . PHP_EOL);
+ //echo(' </div>' . PHP_EOL);
+ */
+ //list with color fx per type
+ echo(' <div class="d-table-cell mg0a txtcenter" style="height:1.5vw; width:24%;">' . PHP_EOL);
+ echo(' <input type="hidden" id="xdropdownstateP2" name="xdropdownstateP2" value="">' . PHP_EOL);
+ echo(' <div class="xdropdownP" style="width:14vw; border-radius:10px;">' . PHP_EOL);
+ $text = 'List by Type &#8628;';
+ if ($filter_type!='') $text = ucfirstletters($filter_type);
+ echo('  <button type="button" name="xdropdown1P2" onclick="xdropdownFunctionP(\'2\')" onkeydown="xdropdownEscCheckP(event);" class="xdropbtnP dropbox dropdown" style="width:14vw; border-radius:10px;">' . $text . '</button>' . PHP_EOL);
+ echo('  <div id="xmyDropdownP2" class="xdropdownP-content" style="width:14vw; min-width:10vw; height:37vw; overflow-y:auto; overflow-x:hidden;">' . PHP_EOL);
+ echo('   <input class="d-none" type="text" name="xdropdown2P2" placeholder="Type and Press Enter to search..." id="xmyInputP2" onkeyup="xfilterFunctionP(\'2\')" onkeydown="xdropdownEscCheckP(event);">' . PHP_EOL);
+ if ($filter_type!='') echo('    <a href="#" onclick="document.getElementById(\'filter_type\').value=\'' . '' . '\'; document.getElementById(\'form_sort\').submit();">' . 'Show All' . '</a>' . PHP_EOL);
+ for ($i = 0; $i < sizeof($PokeTypes); $i++) {
+  echo('    <a href="#" onclick="document.getElementById(\'filter_type\').value=\'' . $PokeTypes[$i] . '\'; document.getElementById(\'form_sort\').submit();"><div class="d-inblock pokebox" style="background-color:var(--color-type-' . $PokeTypes[$i] . ');"></div> &nbsp;' . ucfirstletters($PokeTypes[$i]) . '</a>' . PHP_EOL);
+ }
+ echo('  </div>' . PHP_EOL);
+ echo(' </div>' . PHP_EOL);
+ echo(' </div>' . PHP_EOL);
+ echo(' &nbsp;' . PHP_EOL);
  
  //create array with the pokemon names
  $PokeNames = getPokemonNames('');
@@ -176,7 +233,7 @@ function SelectOptionsForPokemons() {
  echo(' <div class="d-table-cell mg0a txtcenter" style="height:1.5vw; width:28%;">' . PHP_EOL);
  echo(' <input type="hidden" id="xdropdownstateP1" name="xdropdownstateP1" value="">' . PHP_EOL);
  echo(' <div class="xdropdownP" style="width:18vw; border-radius:10px;">' . PHP_EOL);
- echo('  <button type="button" name="xdropdown1P1" onclick="xdropdownFunctionP(\'1\')" onkeydown="xdropdownEscCheckP(event);" class="xdropbtnP dropbox dropdown nwrap" style="width:18vw; border-radius:10px;">Search Pok&eacute;mons &#8628;</button>' . PHP_EOL);
+ echo('  <button type="button" name="xdropdown1P1" onclick="xdropdownFunctionP(\'1\')" onkeydown="xdropdownEscCheckP(event);" class="xdropbtnP dropbox dropdown nwrap" style="width:18vw; border-radius:10px;">Search ' . ucfirstletters($filter_type) . ' Pok&eacute;mons &#8628;</button>' . PHP_EOL);
  echo('  <div id="xmyDropdownP1" class="xdropdownP-content" style="width:18vw; height:36vw; overflow-y:scroll; overflow-x:hidden;">' . PHP_EOL);
  echo('   <input type="text" name="xdropdown2P1" placeholder="Type and Press Enter to search..." id="xmyInputP1" onkeyup="xfilterFunctionP(\'1\')" onkeydown="xdropdownEscCheckP(event);">' . PHP_EOL);
  for ($i = 0; $i < sizeof($PokeNames); $i++) {
